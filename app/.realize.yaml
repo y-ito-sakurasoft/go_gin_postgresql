@@ -1,0 +1,34 @@
+settings:
+  legacy:
+    force: true
+    interval: 100ms
+  files:
+    outputs:
+      status: true
+      name: "../../../../../var/log/go_gin_postgresql/outputs.log"
+    logs:
+      status: true
+      name: "../../../../../var/log/go_gin_postgresql/logs.log"
+    errors:
+      status: true
+      name: "../../../../../var/log/go_gin_postgresql/errors.log"
+server:
+  status: false
+  open: false
+  port: 5002
+  host: localhost
+schema:
+- name: app
+  path: .
+  commands: 
+    run:           
+      status: true 
+  watcher:
+    extensions:
+    - go
+    paths:
+    - / 
+    ignored_paths:
+    - .git
+    - .realize
+    - vendor

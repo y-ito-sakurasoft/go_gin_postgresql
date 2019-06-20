@@ -1,0 +1,64 @@
+version: "3.5"
+
+services:
+  golang:
+    build: .
+    tty: true
+    restart: always
+    container_name: golang
+    volumes:
+      - ./app:/go/src/github.com/go_gin_postgresql/app
+      - ./log:/var/log/go_gin_postgresql
+    ports:
+      - "3000"
+    depends_on:
+      - "postgresql"
+    command: bash -c "cd app && realize start --server"
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - "golang"
+  postgresql:
+    build: ./postgres
+    container_name: postgresql
+    restart: always
+    user: root
+    hostname: postgres
+    volumes:
+      - volume-postgres:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:z
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+  pgadmin4:
+    image: dpage/pgadmin4:4.8
+    container_name: pgadmin4
+    hostname: pgadmin4
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin/storage
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root
+      PGADMIN_DEFAULT_PASSWORD: root
+    depends_on:
+      - "postgresql"
+  redis:
+    image: redis:5.0.4
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data
+    command: redis-server --appendonly yes --requirepass root
+
+volumes:
+  volume-postgres:
+    external: true
